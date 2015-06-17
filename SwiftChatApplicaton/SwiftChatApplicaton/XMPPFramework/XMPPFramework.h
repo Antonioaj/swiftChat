@@ -21,6 +21,8 @@
 //
 //  THIS HEADER FILE SHOULD BE TAILORED TO MATCH YOUR APPLICATION.
 
+#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 #import "XMPP.h"
 

@@ -9,15 +9,37 @@
 import UIKit
 import CoreData
 
+
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+
+
+class AppDelegate: UIResponder, UIApplicationDelegate, XMPPRosterDelegate{
 
     var window: UIWindow?
     var chatInformation = [NSManagedObject]()
+    var chatServer : NSString = "chat.nudj.co"
 
+    var xmppStream :XMPPStream = XMPPStream()
+    var xmppMessageArchivingStorage :XMPPMessageArchivingCoreDataStorage  = XMPPMessageArchivingCoreDataStorage()
+    var xmppMessageArchivingModule :XMPPMessageArchiving = XMPPMessageArchiving();
+    var xmppReconnect :XMPPReconnect = XMPPReconnect();
+    var xmppRosterStorage :XMPPRosterCoreDataStorage = XMPPRosterCoreDataStorage();
+    var xmppRoster  = XMPPRoster(rosterStorage: xmppRosterStorage)
+    
+    var xmppvCardAvatarModule :XMPPvCardAvatarModule = XMPPvCardAvatarModule();
+    var xmppvCardStorage = XMPPvCardCoreDataStorage.sharedInstance()
+    var xmppvCardTempModule = XMPPvCardTempModule(withvCardStorage: <#XMPPvCardTempModuleStorage!#>)  //(withvCardStorage:xmppvCardStorage)
+    
+    var xmppCapabilities :XMPPCapabilities = XMPPCapabilities();
+    var xmppCapabilitiesStorage :XMPPCapabilitiesCoreDataStorage = XMPPCapabilitiesCoreDataStorage();
+    
+    
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
         
+        self.setupStream()
+        
+        println(chatServer)
         println("printing this things count -> \(chatInformation.count)");
         
         return true
@@ -26,6 +48,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillResignActive(application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
+        
+        //self.disconnect(false)
     }
 
     func applicationDidEnterBackground(application: UIApplication) {
@@ -39,14 +63,112 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationDidBecomeActive(application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+        
+        
+        // WILL RECONNECT TO THE CHAT SERVER
+        //if (!self.connect())
+        //{
+          //  println("NOT Connected to chat client !!!")
+        //}
     }
 
     func applicationWillTerminate(application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
         // Saves changes in the application's managed object context before the application terminates.
         self.saveContext()
+        
+        // DISCONECT FROM THE CHAT SERVER
+       // self.disconnect(false);
+       // self.teardownStream();
     }
 
+    
+    
+    //---------------------------------------------------------------------------------
+    //--------------------------- Chat XMPP protocols and configurations
+    
+   func setupStream() {
+    
+    
+    
+    // SET UP ALL XMPP MODULES
+    
+    xmppRoster.autoFetchRoster = YES;
+    xmppRoster.autoAcceptKnownPresenceSubscriptionRequests = YES;
+    
+    // Setup vCard support
+    // The vCard Avatar module works in conjuction with the standard vCard Temp module to download user avatars.
+    // The XMPPRoster will automatically integrate with XMPPvCardAvatarModule to cache roster photos in the roster.
+    
+    xmppvCardStorage = [XMPPvCardCoreDataStorage sharedInstance];
+    xmppvCardTempModule = [[XMPPvCardTempModule alloc] initWithvCardStorage:xmppvCardStorage];
+    
+    xmppvCardAvatarModule = [[XMPPvCardAvatarModule alloc] initWithvCardTempModule:xmppvCardTempModule];
+    xmppCapabilitiesStorage = [XMPPCapabilitiesCoreDataStorage sharedInstance];
+    xmppCapabilities = [[XMPPCapabilities alloc] initWithCapabilitiesStorage:xmppCapabilitiesStorage];
+    
+    xmppCapabilities.autoFetchHashedCapabilities = YES;
+    xmppCapabilities.autoFetchNonHashedCapabilities = NO;
+    
+    xmppMessageArchivingStorage = [XMPPMessageArchivingCoreDataStorage sharedInstance];
+    xmppMessageArchivingModule = [[XMPPMessageArchiving alloc] initWithMessageArchivingStorage:xmppMessageArchivingStorage];
+    [xmppMessageArchivingModule setClientSideMessageArchivingOnly:YES];
+    
+    
+    // Activate xmpp modules
+    [xmppReconnect         activate:xmppStream];
+    [xmppRoster            activate:xmppStream];
+    [xmppvCardTempModule   activate:xmppStream];
+    [xmppvCardAvatarModule activate:xmppStream];
+    [xmppCapabilities      activate:xmppStream];
+    [xmppMessageArchivingModule activate:xmppStream];
+    
+    [xmppStream addDelegate:self delegateQueue:dispatch_get_main_queue()];
+    [xmppRoster addDelegate:self delegateQueue:dispatch_get_main_queue()];
+    [xmppMessageArchivingModule  addDelegate:self delegateQueue:dispatch_get_main_queue()];
+    }
+    
+    
+    func teardownStream()
+    {
+    
+    // REMOVE FROM MEMORY
+    [xmppStream removeDelegate:self];
+    [xmppRoster removeDelegate:self];
+    
+    [xmppReconnect         deactivate];
+    [xmppRoster            deactivate];
+    [xmppvCardTempModule   deactivate];
+    [xmppvCardAvatarModule deactivate];
+    [xmppCapabilities      deactivate];
+    
+    [xmppStream disconnect];
+    
+    xmppStream = nil;
+    xmppReconnect = nil;
+    xmppRoster = nil;
+    xmppRosterStorage = nil;
+    xmppvCardStorage = nil;
+    xmppvCardTempModule = nil;
+    xmppvCardAvatarModule = nil;
+    xmppCapabilities = nil;
+    xmppCapabilitiesStorage = nil;
+    }
+    // MARK: Chat XMPP protocols and configs
+
+    func managedObjectContext_roster () -> NSManagedObjectContext! {
+    
+        return xmppRosterStorage.mainThreadManagedObjectContext;
+        
+    }
+    
+    func managedObjectContext_capabilities () -> NSManagedObjectContext!{
+    
+        return xmppCapabilitiesStorage.mainThreadManagedObjectContext;
+        
+    }
+    
+    
     // MARK: - Core Data stack
 
     lazy var applicationDocumentsDirectory: NSURL = {

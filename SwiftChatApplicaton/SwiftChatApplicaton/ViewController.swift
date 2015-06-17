@@ -29,6 +29,8 @@ var demoData = DemoModelData ()
         
         //lachoisgreat ant@chat.nudj.co antisgreat
 
+        self.title = "Conversation"
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage.jsq_defaultTypingIndicatorImage(), style:UIBarButtonItemStyle.Plain, target:self, action:"performAction:")
         
         self.senderId = "antonio@chat.nudj.co"
         self.senderDisplayName = "Antonio "
@@ -74,6 +76,35 @@ var demoData = DemoModelData ()
         *  self.inputToolbar.maximumHeight = 150;
         */
         
+    }
+    
+    func performAction(sender: UIBarButtonItem){
+        
+        self.showTypingIndicator = !self.showTypingIndicator;
+        
+        /**
+        *  Scroll to actually view the indicator
+        */
+        self.scrollToBottomAnimated(true);
+
+        
+        var copyMessage = self.demoData.messages.lastObject!.copy() as! JSQMessage
+        
+        /**
+        *  Allow typing indicator to show
+        */
+        
+        let delayTime = dispatch_time(DISPATCH_TIME_NOW,
+            Int64(1 * Double(NSEC_PER_SEC)))
+        
+        dispatch_after(delayTime, dispatch_get_main_queue()) {
+            JSQSystemSoundPlayer.jsq_playMessageReceivedSound();
+            self.demoData.messages.addObject(copyMessage);
+            self.finishReceivingMessageAnimated(true);
+
+        }
+        
+
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -177,12 +208,12 @@ var demoData = DemoModelData ()
     
     override func collectionView(collectionView: JSQMessagesCollectionView!, attributedTextForCellTopLabelAtIndexPath indexPath: NSIndexPath!) -> NSAttributedString! {
         
-        if (indexPath.item % 3 == 0) {
+        /*if (indexPath.item % 3 == 0) {
             var message = self.demoData.messages.objectAtIndex(indexPath.item) as! JSQMessage
             return JSQMessagesTimestampFormatter.sharedFormatter().attributedTimestampForDate(message.date)
-        }
+        }*/
         
-        return nil;
+        return nil
         
     }
     
@@ -215,7 +246,9 @@ var demoData = DemoModelData ()
     
     override func collectionView(collectionView: JSQMessagesCollectionView!, attributedTextForCellBottomLabelAtIndexPath indexPath: NSIndexPath!) -> NSAttributedString! {
         
-        return nil
+        var message = self.demoData.messages.objectAtIndex(indexPath.item) as! JSQMessage
+        return JSQMessagesTimestampFormatter.sharedFormatter().attributedTimestampForDate(message.date)
+        
     }
     
     
@@ -252,18 +285,16 @@ var demoData = DemoModelData ()
     
     var msg = self.demoData.messages.objectAtIndex(indexPath.item) as! JSQMessage
     
-    if (!msg.isMediaMessage) {
     
-        if (msg.senderId == self.senderId) {
-        cell.textView.textColor = UIColor.blackColor()
-        }else {
-        cell.textView.textColor = UIColor.whiteColor()
-        }
-            
-        let attributes : [NSObject:AnyObject] = [NSForegroundColorAttributeName:cell.textView.textColor, NSUnderlineStyleAttributeName: 1]
-        cell.textView.linkTextAttributes = attributes
-       
+    if (msg.senderId == self.senderId) {
+    cell.textView.textColor = UIColor.whiteColor()
+    }else {
+    cell.textView.textColor = UIColor.blackColor()
     }
+        
+    let attributes : [NSObject:AnyObject] = [NSForegroundColorAttributeName:cell.textView.textColor, NSUnderlineStyleAttributeName: 1]
+    cell.textView.linkTextAttributes = attributes
+       
     
     return cell;
     
@@ -271,16 +302,16 @@ var demoData = DemoModelData ()
     
     override func collectionView(collectionView: JSQMessagesCollectionView!, layout collectionViewLayout: JSQMessagesCollectionViewFlowLayout!, heightForCellBottomLabelAtIndexPath indexPath: NSIndexPath!) -> CGFloat {
         
-        return 0.0
+        return kJSQMessagesCollectionViewCellLabelHeightDefault
         
     }
     
     
     override func collectionView(collectionView: JSQMessagesCollectionView!, layout collectionViewLayout: JSQMessagesCollectionViewFlowLayout!, heightForCellTopLabelAtIndexPath indexPath: NSIndexPath!) -> CGFloat {
         
-        if (indexPath.item % 3 == 0) {
+        /*if (indexPath.item % 3 == 0) {
             return kJSQMessagesCollectionViewCellLabelHeightDefault;
-        }
+        }*/
         
         return 0.0
     }
@@ -291,7 +322,7 @@ var demoData = DemoModelData ()
         *  iOS7-style sender name labels
         */
         
-        var currentMessage = self.demoData.messages.objectAtIndex(indexPath.item) as! JSQMessage
+        /*var currentMessage = self.demoData.messages.objectAtIndex(indexPath.item) as! JSQMessage
         if (currentMessage.senderId == self.senderId) {
             return 0.0
         }
@@ -303,7 +334,9 @@ var demoData = DemoModelData ()
             }
         }
         
-        return kJSQMessagesCollectionViewCellLabelHeightDefault;
+        return kJSQMessagesCollectionViewCellLabelHeightDefault;*/
+        
+        return 0.0
 
     }
     

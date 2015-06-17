@@ -97,18 +97,19 @@
      */
     self.messages = [[NSMutableArray alloc] initWithObjects:
                      [[JSQMessage alloc] initWithSenderId:kJSQDemoAvatarIdCook
-                                        senderDisplayName:kJSQDemoAvatarDisplayNameCook
+                                        senderDisplayName:@""
                                                      date:[NSDate distantPast]
                                                      text:@"Hello"],
                      [[JSQMessage alloc] initWithSenderId:kJSQDemoAvatarIdCook
-                                        senderDisplayName:kJSQDemoAvatarDisplayNameCook
+                                        senderDisplayName:@""
                                                      date:[NSDate distantPast]
                                                      text:@"Hi."],
                      [[JSQMessage alloc] initWithSenderId:@"antonio@chat.nudj.co"
-                                        senderDisplayName:@"Antonio"
+                                        senderDisplayName:@""
                                                      date:[NSDate distantPast]
-                                                     text:@"sup?."],
+                                                     text:@"Hi Robyn. \n\nMy friend Chris at Oracle is looking for a director of Business Development and i  thought i'd ask you. Are you interested?"],
                      nil];
+    
     
     
     //[self addPhotoMediaMessage];

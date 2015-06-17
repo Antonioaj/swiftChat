@@ -9,7 +9,7 @@
 
 
 #import "CustomObject.h"
-#import "XMPP.h"
+#import "XMPPFramework.h"
 #import "JSQMessages.h"
 #import "DemoModelData.h"
 #import "NSUserDefaults+DemoSettings.h"

@@ -2059,7 +2059,7 @@
 				);
 				OTHER_LDFLAGS = "-lxml2";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "/Users/antonio/Documents/IOS Workspace/SwiftChatApplicaton/SwiftChatApplicaton/SwiftChatApplicaton-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "$(PROJECT_DIR)/SwiftChatApplicaton/SwiftChatApplicaton-Bridging-Header.h";
 			};
 			name = Debug;
 		};
@@ -2085,7 +2085,7 @@
 				);
 				OTHER_LDFLAGS = "-lxml2";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "/Users/antonio/Documents/IOS Workspace/SwiftChatApplicaton/SwiftChatApplicaton/SwiftChatApplicaton-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "$(PROJECT_DIR)/SwiftChatApplicaton/SwiftChatApplicaton-Bridging-Header.h";
 			};
 			name = Release;
 		};
