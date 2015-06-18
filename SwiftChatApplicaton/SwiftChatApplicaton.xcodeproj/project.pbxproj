@@ -193,6 +193,8 @@
 		A96680DB1B287D85007640CA /* libxml2.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A96680D91B287D85007640CA /* libxml2.2.dylib */; };
 		A96680DC1B287D85007640CA /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A96680DA1B287D85007640CA /* libxml2.dylib */; };
 		A96680E31B289333007640CA /* CustomObject.m in Sources */ = {isa = PBXBuildFile; fileRef = A96680E21B289333007640CA /* CustomObject.m */; };
+		A9C6EAB31B331B5F00EC9140 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9C6EAB21B331B5F00EC9140 /* CFNetwork.framework */; };
+		A9C6EAB51B331B6700EC9140 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9C6EAB41B331B6700EC9140 /* Security.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -582,6 +584,8 @@
 		A96680E41B289367007640CA /* CustomObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CustomObject.h; sourceTree = "<group>"; };
 		A96680E51B289A49007640CA /* XMPPFramework.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XMPPFramework.h; sourceTree = "<group>"; };
 		A96680E71B289CF0007640CA /* SwiftChatApplicaton-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SwiftChatApplicaton-Prefix.pch"; sourceTree = "<group>"; };
+		A9C6EAB21B331B5F00EC9140 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
+		A9C6EAB41B331B6700EC9140 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -589,6 +593,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A9C6EAB51B331B6700EC9140 /* Security.framework in Frameworks */,
+				A9C6EAB31B331B5F00EC9140 /* CFNetwork.framework in Frameworks */,
 				A95F21191B28A9B6001614AB /* AudioToolbox.framework in Frameworks */,
 				A96680DB1B287D85007640CA /* libxml2.2.dylib in Frameworks */,
 				A96680DC1B287D85007640CA /* libxml2.dylib in Frameworks */,
@@ -1630,6 +1636,8 @@
 		A96680DD1B287DE9007640CA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A9C6EAB41B331B6700EC9140 /* Security.framework */,
+				A9C6EAB21B331B5F00EC9140 /* CFNetwork.framework */,
 				A95F21181B28A9B6001614AB /* AudioToolbox.framework */,
 				A96680D91B287D85007640CA /* libxml2.2.dylib */,
 				A96680DA1B287D85007640CA /* libxml2.dylib */,
@@ -2092,10 +2100,13 @@
 		A9667F071B2731D3007640CA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
+					"$(PROJECT_DIR)/SwiftChatApplication",
+					"$(PROJECT_DIR)",
 				);
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -2103,23 +2114,36 @@
 				);
 				INFOPLIST_FILE = SwiftChatApplicatonTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/SwiftChatApplication//Vendor/libidn",
+					"$(inherited)",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SwiftChatApplicaton.app/SwiftChatApplicaton";
+				USER_HEADER_SEARCH_PATHS = "$(SDKROOT)/usr/include/libxml2 /usr/include/libxml2";
 			};
 			name = Debug;
 		};
 		A9667F081B2731D3007640CA /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
+					"$(PROJECT_DIR)/SwiftChatApplication",
+					"$(PROJECT_DIR)",
 				);
 				INFOPLIST_FILE = SwiftChatApplicatonTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/SwiftChatApplication//Vendor/libidn",
+					"$(inherited)",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SwiftChatApplicaton.app/SwiftChatApplicaton";
+				USER_HEADER_SEARCH_PATHS = "$(SDKROOT)/usr/include/libxml2 /usr/include/libxml2";
 			};
 			name = Release;
 		};

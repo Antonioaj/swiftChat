@@ -10,3 +10,7 @@
 #import <UIKit/UIKit.h>
 #import <Foundation/Foundation.h>
 #endif
+
+#ifndef NSXMLElement
+#define NSXMLElement DDXMLElement
+#endif

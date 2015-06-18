@@ -12,27 +12,27 @@ import CoreData
 
 @UIApplicationMain
 
-
 class AppDelegate: UIResponder, UIApplicationDelegate, XMPPRosterDelegate{
 
     var window: UIWindow?
-    var chatInformation = [NSManagedObject]()
-    var chatServer : NSString = "chat.nudj.co"
+    var chatInformation = [NSManagedObject]();
+    var chatServer : NSString = "chat.nudj.co";
+    
+    //XMPP ATTRIBUTES
+    var xmppStream : XMPPStream?;
+    var xmppReconnect :XMPPReconnect?;
+    var xmppRosterStorage :XMPPRosterCoreDataStorage?;
+    var xmppRoster :XMPPRoster?;
+    var xmppvCardStorage :XMPPvCardCoreDataStorage?;
+    var xmppvCardTempModule :XMPPvCardTempModule?;
+    var xmppvCardAvatarModule :XMPPvCardAvatarModule?;
+    var xmppCapabilitiesStorage :XMPPCapabilitiesCoreDataStorage?;
+    var xmppCapabilities :XMPPCapabilities?;
+    var xmppMessageArchivingStorage :XMPPMessageArchivingCoreDataStorage?;
+    var xmppMessageArchivingModule  :XMPPMessageArchiving?;
 
-    var xmppStream :XMPPStream = XMPPStream()
-    var xmppMessageArchivingStorage :XMPPMessageArchivingCoreDataStorage  = XMPPMessageArchivingCoreDataStorage()
-    var xmppMessageArchivingModule :XMPPMessageArchiving = XMPPMessageArchiving();
-    var xmppReconnect :XMPPReconnect = XMPPReconnect();
-    var xmppRosterStorage :XMPPRosterCoreDataStorage = XMPPRosterCoreDataStorage();
-    var xmppRoster  = XMPPRoster(rosterStorage: xmppRosterStorage)
-    
-    var xmppvCardAvatarModule :XMPPvCardAvatarModule = XMPPvCardAvatarModule();
-    var xmppvCardStorage = XMPPvCardCoreDataStorage.sharedInstance()
-    var xmppvCardTempModule = XMPPvCardTempModule(withvCardStorage: <#XMPPvCardTempModuleStorage!#>)  //(withvCardStorage:xmppvCardStorage)
-    
-    var xmppCapabilities :XMPPCapabilities = XMPPCapabilities();
-    var xmppCapabilitiesStorage :XMPPCapabilitiesCoreDataStorage = XMPPCapabilitiesCoreDataStorage();
-    
+    let jabberUsername = "5@chat.nudj.co";
+    let jabberPassword = "SKozZ3AuQLUTcHm8FVxSFjxuC3wniMzczWN6g9n5LU6dnAarxXzlPOXIPwtT";
     
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
@@ -84,65 +84,70 @@ class AppDelegate: UIResponder, UIApplicationDelegate, XMPPRosterDelegate{
 
     
     
-    //---------------------------------------------------------------------------------
-    //--------------------------- Chat XMPP protocols and configurations
+   // MARK: XMPP allocation and set up
     
    func setupStream() {
     
-    
-    
     // SET UP ALL XMPP MODULES
-    
-    xmppRoster.autoFetchRoster = YES;
-    xmppRoster.autoAcceptKnownPresenceSubscriptionRequests = YES;
-    
     // Setup vCard support
     // The vCard Avatar module works in conjuction with the standard vCard Temp module to download user avatars.
     // The XMPPRoster will automatically integrate with XMPPvCardAvatarModule to cache roster photos in the roster.
     
-    xmppvCardStorage = [XMPPvCardCoreDataStorage sharedInstance];
-    xmppvCardTempModule = [[XMPPvCardTempModule alloc] initWithvCardStorage:xmppvCardStorage];
+    xmppStream = XMPPStream();
+
+    xmppReconnect = XMPPReconnect();
+    xmppRosterStorage = XMPPRosterCoreDataStorage();
+    xmppRoster = XMPPRoster(rosterStorage: xmppRosterStorage);
+   
+    xmppvCardStorage = XMPPvCardCoreDataStorage.sharedInstance();
+    xmppvCardTempModule = XMPPvCardTempModule(withvCardStorage:xmppvCardStorage);
     
-    xmppvCardAvatarModule = [[XMPPvCardAvatarModule alloc] initWithvCardTempModule:xmppvCardTempModule];
-    xmppCapabilitiesStorage = [XMPPCapabilitiesCoreDataStorage sharedInstance];
-    xmppCapabilities = [[XMPPCapabilities alloc] initWithCapabilitiesStorage:xmppCapabilitiesStorage];
+    xmppvCardAvatarModule = XMPPvCardAvatarModule(withvCardTempModule:xmppvCardTempModule);
+
+    xmppCapabilitiesStorage = XMPPCapabilitiesCoreDataStorage.sharedInstance();
+    xmppCapabilities = XMPPCapabilities(capabilitiesStorage: xmppCapabilitiesStorage);
     
-    xmppCapabilities.autoFetchHashedCapabilities = YES;
-    xmppCapabilities.autoFetchNonHashedCapabilities = NO;
+    // SET UP ALL XMPP MODULES
+    xmppRoster!.autoFetchRoster = true;
+    xmppRoster!.autoAcceptKnownPresenceSubscriptionRequests = true;
     
-    xmppMessageArchivingStorage = [XMPPMessageArchivingCoreDataStorage sharedInstance];
-    xmppMessageArchivingModule = [[XMPPMessageArchiving alloc] initWithMessageArchivingStorage:xmppMessageArchivingStorage];
-    [xmppMessageArchivingModule setClientSideMessageArchivingOnly:YES];
+    xmppCapabilities!.autoFetchHashedCapabilities = true;
+    xmppCapabilities!.autoFetchNonHashedCapabilities = true;
+    
+    xmppMessageArchivingStorage = XMPPMessageArchivingCoreDataStorage.sharedInstance();
+    xmppMessageArchivingModule = XMPPMessageArchiving(messageArchivingStorage: xmppMessageArchivingStorage);
+    xmppMessageArchivingModule!.clientSideMessageArchivingOnly = true;
     
     
     // Activate xmpp modules
-    [xmppReconnect         activate:xmppStream];
-    [xmppRoster            activate:xmppStream];
-    [xmppvCardTempModule   activate:xmppStream];
-    [xmppvCardAvatarModule activate:xmppStream];
-    [xmppCapabilities      activate:xmppStream];
-    [xmppMessageArchivingModule activate:xmppStream];
+    xmppReconnect!.activate(xmppStream);
+    xmppRoster!.activate(xmppStream);
+    xmppvCardTempModule!.activate(xmppStream);
+    xmppvCardAvatarModule!.activate(xmppStream);
+    xmppCapabilities!.activate(xmppStream);
+    xmppMessageArchivingModule!.activate(xmppStream);
     
-    [xmppStream addDelegate:self delegateQueue:dispatch_get_main_queue()];
-    [xmppRoster addDelegate:self delegateQueue:dispatch_get_main_queue()];
-    [xmppMessageArchivingModule  addDelegate:self delegateQueue:dispatch_get_main_queue()];
+    xmppStream!.addDelegate(self, delegateQueue: dispatch_get_main_queue());
+    xmppRoster!.addDelegate(self, delegateQueue:dispatch_get_main_queue());
+    xmppMessageArchivingModule!.addDelegate(self, delegateQueue:dispatch_get_main_queue());
+    
     }
     
+    // MARK: XMPP Dealloc
     
-    func teardownStream()
-    {
+    func teardownStream(){
     
     // REMOVE FROM MEMORY
-    [xmppStream removeDelegate:self];
-    [xmppRoster removeDelegate:self];
+    xmppStream!.removeDelegate(self);
+    xmppRoster!.removeDelegate(self);
     
-    [xmppReconnect         deactivate];
-    [xmppRoster            deactivate];
-    [xmppvCardTempModule   deactivate];
-    [xmppvCardAvatarModule deactivate];
-    [xmppCapabilities      deactivate];
+    xmppReconnect!.deactivate();
+    xmppRoster!.deactivate();
+    xmppvCardTempModule!.deactivate();
+    xmppvCardAvatarModule!.deactivate();
+    xmppCapabilities!.deactivate();
     
-    [xmppStream disconnect];
+    xmppStream!.disconnect();
     
     xmppStream = nil;
     xmppReconnect = nil;
@@ -153,21 +158,138 @@ class AppDelegate: UIResponder, UIApplicationDelegate, XMPPRosterDelegate{
     xmppvCardAvatarModule = nil;
     xmppCapabilities = nil;
     xmppCapabilitiesStorage = nil;
+        
     }
-    // MARK: Chat XMPP protocols and configs
+    
+    // MARK: XMPP protocols and configs
 
     func managedObjectContext_roster () -> NSManagedObjectContext! {
     
-        return xmppRosterStorage.mainThreadManagedObjectContext;
+        return xmppRosterStorage!.mainThreadManagedObjectContext;
         
     }
     
     func managedObjectContext_capabilities () -> NSManagedObjectContext!{
     
-        return xmppCapabilitiesStorage.mainThreadManagedObjectContext;
+        return xmppCapabilitiesStorage!.mainThreadManagedObjectContext;
         
     }
     
+    
+    func goOnline()
+    {
+    
+    var presence : XMPPPresence = XMPPPresence()
+    xmppStream!.sendElement(presence);
+        
+    }
+    
+    func goOffline()
+    {
+    
+    var presence : XMPPPresence = XMPPPresence(type: "unavailable");
+    xmppStream!.sendElement(presence);
+    
+    }
+    
+    
+    func connect() -> Bool{
+    
+    let prefs = NSUserDefaults.standardUserDefaults();
+        
+    // getting the token
+    let token : NSString = prefs.stringForKey("token")!;
+        
+    if(token.length > 0){
+  
+
+        if (!xmppStream!.isDisconnected()) {
+            
+            self.goOnline();
+            
+            return true;
+            
+        }
+
+//        let jabberUsername = NSUserDefaults.standardUserDefaults().stringForKey("userJabberID");
+//        let jabberPassword = NSUserDefaults.standardUserDefaults().stringForKey("userJabberPassword");
+        
+        println("Connecting to chat server with: \(jabberUsername) - \(jabberPassword)");
+        
+        if (jabberUsername.isEmpty || jabberPassword.isEmpty) {
+            
+            return false;
+            
+        }
+        
+        
+        xmppStream!.myJID = XMPPJID.jidWithString(jabberUsername);
+        var error: NSError?;
+        
+        if (!xmppStream!.connectWithTimeout(XMPPStreamTimeoutNone, error: &error)) {
+            
+            let alertView = UIAlertView(title: "Error", message:"Can't connect to the chat server \(error!.localizedDescription)", delegate: nil, cancelButtonTitle: "Ok")
+            alertView.show()
+            
+            return false;
+            
+        }
+        
+        return true;
+        
+    }else{
+        
+        return false
+        
+    }
+        
+    
+    }
+    
+    
+    func disconnect(query:Bool){
+    let prefs = NSUserDefaults.standardUserDefaults();
+    
+    // getting the token
+    let token = prefs.stringForKey("token");
+    
+    self.goOffline();
+    
+    if(query){
+    xmppStream!.disconnect();
+    }
+        
+    }
+
+    
+    func xmppStreamDidConnect(sender :XMPPStream) {
+    
+    var error : NSError?;
+    //let jabberPassword = NSUserDefaults.standardUserDefaults().stringForKey("userJabberPassword");
+    
+
+        if (!self.xmppStream!.authenticateWithPassword(jabberPassword, error: &error))
+        {
+            println("Error authenticating: \(error)");
+        }
+    
+    
+    }
+    
+    func xmppStreamDidAuthenticate(sender :XMPPStream) {
+    
+    self.goOnline();
+    
+    println("Has CONNECTED TO JABBER");
+    
+    }
+
+
+    func xmppStream(sender:XMPPStream, didNotAuthenticate error:NSXMLElement){
+    
+    println("Could not authenticate Error \(error)");
+    
+    }
     
     // MARK: - Core Data stack
 
